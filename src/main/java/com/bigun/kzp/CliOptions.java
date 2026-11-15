@@ -1,7 +1,6 @@
 package com.bigun.kzp;
 
 import java.nio.file.Path;
-import java.util.Optional;
 
 /**
  * Parsed command-line options for the inventory report application.
