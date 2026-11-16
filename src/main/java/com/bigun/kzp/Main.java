@@ -5,9 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * Command-line application for generating an automobile-parts inventory report.
- */
 public final class Main {
     private static final String HELP = """
             Використання: java -jar kzp-bigun-1.0-SNAPSHOT.jar [опції]
@@ -20,11 +17,6 @@ public final class Main {
     private Main() {
     }
 
-    /**
-     * Parses arguments and runs the requested command.
-     *
-     * @param args command-line arguments
-     */
     public static void main(String[] args) {
         try {
             run(args);

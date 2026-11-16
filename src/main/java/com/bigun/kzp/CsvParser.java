@@ -1,15 +1,6 @@
 package com.bigun.kzp;
 
-/**
- * Parses and validates a semicolon-delimited inventory CSV line.
- */
 public final class CsvParser {
-    /**
-     * Parses one line containing name, SKU, unit price, stock, and supplier.
-     *
-     * @param line raw input line
-     * @return valid, invalid, or skipped result
-     */
     public ParseResult parse(String line) {
         if (line == null || line.isBlank()) {
             return ParseResult.skipped();

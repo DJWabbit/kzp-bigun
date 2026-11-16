@@ -4,17 +4,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-/**
- * Formats inventory statistics and input validation errors for display.
- */
 public final class ReportFormatter {
-    /**
-     * Formats one report in a locale-independent representation.
-     *
-     * @param stats calculated inventory indicators
-     * @param errors line-numbered input errors
-     * @return report text ending with a platform newline
-     */
     public String format(InventoryStats stats, List<String> errors) {
         StringBuilder report = new StringBuilder();
         report.append(String.format(Locale.ROOT, "Звіт: склад автозапчастин%n"));
