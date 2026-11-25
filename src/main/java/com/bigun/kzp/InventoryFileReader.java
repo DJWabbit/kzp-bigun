@@ -20,6 +20,11 @@ public final class InventoryFileReader {
         this(new CsvParser());
     }
 
+    /**
+     * Creates a file reader with the given parser.
+     *
+     * @param parser parser applied to every line
+     */
     InventoryFileReader(CsvParser parser) {
         this.parser = parser;
     }

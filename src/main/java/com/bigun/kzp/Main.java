@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 
 /**
  * Command-line application for generating an automobile-parts inventory report.
  */
 public final class Main {
     private static final String HELP = """
-            Використання: java -jar kzp-bigun-1.0-SNAPSHOT.jar [опції]
+            Використання: java -jar kzp-bigun-1.0.0.jar [опції]
               --help             показати цю довідку
               --version          показати версію у форматі version+build
               --input <шлях>     CSV-файл (за замовчуванням data/input.csv)
@@ -29,11 +30,28 @@ public final class Main {
         try {
             run(args);
         } catch (IllegalArgumentException | IOException exception) {
-            System.err.println("Помилка: " + exception.getMessage());
+            printError(exception.getMessage());
             System.exit(1);
         }
     }
 
+    /**
+     * Prints an error as UTF-8 so that Cyrillic text does not depend on the system charset.
+     *
+     * @param message error description
+     */
+    static void printError(String message) {
+        String line = String.format(Locale.ROOT, "Помилка: %s%n", message);
+        System.err.writeBytes(line.getBytes(StandardCharsets.UTF_8));
+        System.err.flush();
+    }
+
+    /**
+     * Executes the requested mode and writes the report to the console and to the output file.
+     *
+     * @param args command-line arguments
+     * @throws IOException if the input, output, or version resource cannot be accessed
+     */
     private static void run(String[] args) throws IOException {
         CliOptions options = CliOptions.parse(args);
         if (options.help()) {

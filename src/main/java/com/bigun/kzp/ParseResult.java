@@ -5,8 +5,8 @@ import java.util.Optional;
 /**
  * Result of validating a single CSV line.
  *
- * @param item parsed item, or empty when the line is invalid or blank
- * @param error validation message, or empty when the line is valid or blank
+ * @param item parsed item, or empty when the line is invalid
+ * @param error validation message, or empty when the line is valid
  */
 public record ParseResult(Optional<InventoryItem> item, Optional<String> error) {
     /**
@@ -27,14 +27,5 @@ public record ParseResult(Optional<InventoryItem> item, Optional<String> error) 
      */
     public static ParseResult invalid(String reason) {
         return new ParseResult(Optional.empty(), Optional.of(reason));
-    }
-
-    /**
-     * Creates a result for a blank line, which is intentionally ignored.
-     *
-     * @return ignored result
-     */
-    public static ParseResult skipped() {
-        return new ParseResult(Optional.empty(), Optional.empty());
     }
 }
