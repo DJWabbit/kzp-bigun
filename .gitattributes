@@ -1,0 +1,11 @@
+# Git зберігає текст із LF; скрипти мають формат, потрібний своїй ОС.
+* text=auto eol=lf
+mvnw text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Двійкові файли не нормалізуються.
+*.jar binary
+*.png binary
+*.docx binary
+*.pdf binary
