@@ -6,11 +6,14 @@
 
     <groupId>com.bigun.kzp</groupId>
     <artifactId>kzp-bigun</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Локальне значення; під час збірки на сервері замінюється через -Dbuild.number. -->
+        <build.number>local</build.number>
         <junit.version>5.10.2</junit.version>
     </properties>
 
@@ -24,6 +27,13 @@
     </dependencies>
 
     <build>
+        <!-- Maven підставляє версію та номер збірки у version.properties. -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -2,7 +2,22 @@ package com.bigun.kzp;
 
 import java.nio.file.Path;
 
+/**
+ * Parsed command-line options for the inventory report application.
+ *
+ * @param input input CSV path
+ * @param output report output path
+ * @param help whether help was requested
+ * @param version whether version was requested
+ */
 public record CliOptions(Path input, Path output, boolean help, boolean version) {
+    /**
+     * Parses command line options and their path values.
+     *
+     * @param args command-line arguments
+     * @return parsed options
+     * @throws IllegalArgumentException for unknown options or missing values
+     */
     public static CliOptions parse(String[] args) {
         Path input = Path.of("data", "input.csv");
         Path output = Path.of("out", "report.txt");
