@@ -38,12 +38,12 @@ public record InventoryStats(int validRecordCount, StockValue stockValue,
      * @return calculated indicators, with an empty most-expensive part for empty input
      */
     public static InventoryStats calculate(List<SparePart> items) {
-        long stock = 0;
-        double value = 0;
-        for (SparePart item : items) {
-            stock += item.getStock();
-            value += item.getUnitPrice() * item.getStock();
-        }
+        long stock = items.stream()
+                .mapToLong(SparePart::getStock)
+                .sum();
+        double value = items.stream()
+                .mapToDouble(item -> item.getUnitPrice() * item.getStock())
+                .sum();
         Optional<SparePart> mostExpensive = items.stream()
                 .max(Comparator.comparingDouble(SparePart::getUnitPrice));
         return new InventoryStats(items.size(), new StockValue(stock, value), mostExpensive);
