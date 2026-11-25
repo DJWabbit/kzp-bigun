@@ -111,8 +111,8 @@ class CsvParserTest {
 
     @Test
     void calculatesAllIndicatorsForSeveralRecords() {
-        SparePart brake = new SparePart("BRK-001", "Гальмівні колодки", 12, 1250.50, "АвтоПостач");
-        SparePart belt = new SparePart("TIM-008", "Ремінь ГРМ", 7, 2100.00, "АвтоПостач");
+        SparePart brake = new OriginalPart("BRK-001", "Гальмівні колодки", 12, 1250.50, "АвтоПостач");
+        SparePart belt = new OriginalPart("TIM-008", "Ремінь ГРМ", 7, 2100.00, "АвтоПостач");
 
         InventoryStats stats = InventoryStats.calculate(List.of(brake, belt));
 
