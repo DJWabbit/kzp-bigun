@@ -17,6 +17,8 @@ public final class Main {
               --input <шлях>     CSV-файл (за замовчуванням data/input.csv)
               --output <шлях>    файл звіту (за замовчуванням out/report.txt)
               --warranty         вивести в консоль гарантійну вартість деталей
+              --queries          вивести в консоль результати запитів до складу
+              --find <артикул>   знайти деталь за артикулом і вивести її в консоль
             """;
 
     private Main() {
@@ -75,9 +77,15 @@ public final class Main {
             Files.createDirectories(parent);
         }
         Files.writeString(output, report, StandardCharsets.UTF_8);
+        StringBuilder details = new StringBuilder();
         if (options.warranty()) {
-            System.out.write(WarrantyReport.format(result.items()).getBytes(StandardCharsets.UTF_8));
-            System.out.flush();
+            details.append(WarrantyReport.format(result.items()));
         }
+        if (options.queries()) {
+            details.append(QueryReport.format(result.items()));
+        }
+        options.find().ifPresent(sku -> details.append(QueryReport.formatSearch(result.items(), sku)));
+        System.out.write(details.toString().getBytes(StandardCharsets.UTF_8));
+        System.out.flush();
     }
 }
