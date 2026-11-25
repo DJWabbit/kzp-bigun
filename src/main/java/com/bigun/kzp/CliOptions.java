@@ -1,6 +1,7 @@
 package com.bigun.kzp;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * Parsed command-line options for the inventory report application.
@@ -10,8 +11,11 @@ import java.nio.file.Path;
  * @param help whether help was requested
  * @param version whether version was requested
  * @param warranty whether the warranty report was requested
+ * @param queries whether the query report was requested
+ * @param find SKU to search for, if requested
  */
-public record CliOptions(Path input, Path output, boolean help, boolean version, boolean warranty) {
+public record CliOptions(Path input, Path output, boolean help, boolean version, boolean warranty,
+                         boolean queries, Optional<String> find) {
     /**
      * Parses command line options and their path values.
      *
@@ -25,11 +29,20 @@ public record CliOptions(Path input, Path output, boolean help, boolean version,
         boolean help = false;
         boolean version = false;
         boolean warranty = false;
+        boolean queries = false;
+        Optional<String> find = Optional.empty();
         for (int index = 0; index < args.length; index++) {
             switch (args[index]) {
                 case "--help" -> help = true;
                 case "--version" -> version = true;
                 case "--warranty" -> warranty = true;
+                case "--queries" -> queries = true;
+                case "--find" -> {
+                    if (++index >= args.length) {
+                        throw new IllegalArgumentException("Для --find потрібно вказати артикул.");
+                    }
+                    find = Optional.of(args[index]);
+                }
                 case "--input" -> {
                     if (++index >= args.length) {
                         throw new IllegalArgumentException("Для --input потрібно вказати шлях.");
@@ -45,6 +58,6 @@ public record CliOptions(Path input, Path output, boolean help, boolean version,
                 default -> throw new IllegalArgumentException("Невідомий аргумент: " + args[index]);
             }
         }
-        return new CliOptions(input, output, help, version, warranty);
+        return new CliOptions(input, output, help, version, warranty, queries, find);
     }
 }
