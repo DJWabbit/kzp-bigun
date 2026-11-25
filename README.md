@@ -1,10 +1,10 @@
 # Кросплатформні засоби програмування
 
 * **Студент:** Бігун Ілля
-* **Пошта:** Illia.Bihun.Kl.2024@lpnu.ua
+* **Пошта:** Illia.Bihun.KI.2024@lpnu.ua
 * **Рівень:** 2
 * **Варіант №4:** Склад автозапчастин
-* **Викладач:** Максим Олексіїв
+* **Викладач:** Максим Олексів
 
 
 # Лабораторна робота №1 — склад автозапчастин
@@ -13,13 +13,13 @@
 
 ## Формат вхідного CSV
 
-Файл кодується UTF-8. Кожен непорожній рядок має п'ять полів, розділених крапкою з комою:
+Файл кодується UTF-8. Кожен рядок має п'ять полів, розділених крапкою з комою:
 
 ```text
-name;sku;unitPrice;stock;supplier
+sku;name;stock;unitPrice;supplier
 ```
 
-`unitPrice` — невід'ємне скінченне число з десятковою крапкою; `stock` — невід'ємне ціле число. Текстові поля не можуть бути порожніми. Порожні рядки ігноруються. Приклад даних: [data/input.csv](data/input.csv).
+`sku` — артикул, `name` — назва деталі, `stock` — невід'ємне ціле число, `unitPrice` — невід'ємне скінченне число з десятковою крапкою, `supplier` — постачальник. Текстові поля не можуть бути порожніми. Порожній рядок вважається помилкою. Приклад даних: [data/input.csv](data/input.csv).
 
 ## Збірка та запуск
 
@@ -28,20 +28,20 @@ name;sku;unitPrice;stock;supplier
 ```powershell
 .\mvnw.cmd clean verify
 .\mvnw.cmd package
-java -jar target/kzp-bigun-1.0-SNAPSHOT.jar
-java -jar target/kzp-bigun-1.0-SNAPSHOT.jar --input data/input.csv --output out/report.txt
-java -jar target/kzp-bigun-1.0-SNAPSHOT.jar --version
-java -jar target/kzp-bigun-1.0-SNAPSHOT.jar --help
+java -jar target/kzp-bigun-1.0.0.jar
+java -jar target/kzp-bigun-1.0.0.jar --input data/input.csv --output out/report.txt
+java -jar target/kzp-bigun-1.0.0.jar --version
+java -jar target/kzp-bigun-1.0.0.jar --help
 ```
 
 На Linux/macOS для збірки використовуйте `./mvnw clean verify` та `./mvnw package`.
-Без параметрів зчитується `data/input.csv`, а звіт записується в `out/report.txt` і одночасно виводиться в консоль. Метадані версії зберігаються у `src/main/resources/version.properties`.
+Без параметрів зчитується `data/input.csv`, а звіт записується в `out/report.txt` і одночасно виводиться в консоль. Версію задає `<version>` у `pom.xml`: під час збірки Maven підставляє її та номер збірки в `src/main/resources/version.properties`, тому локально `--version` виводить `1.0.0+local`.
 
 ## Структура
 
 - `CsvParser` — валідація окремого запису.
 - `InventoryFileReader` — читання UTF-8 файлу та накопичення помилок із номерами рядків.
 - `InventoryStats` — обчислення показників варіанта.
-- `ReportFormatter` — локалезалежне форматування звіту.
+- `ReportFormatter` — форматування звіту, незалежне від локалі.
 - `Main` і `CliOptions` — обробка CLI та запуск програми.
 - `src/test/java` — тести JUnit 5.
