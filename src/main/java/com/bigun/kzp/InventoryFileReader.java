@@ -37,7 +37,7 @@ public final class InventoryFileReader {
      * @throws IOException if the file cannot be read
      */
     public ReadResult read(Path path) throws IOException {
-        List<InventoryItem> items = new ArrayList<>();
+        List<SparePart> items = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
         for (int index = 0; index < lines.size(); index++) {
@@ -52,14 +52,14 @@ public final class InventoryFileReader {
     /**
      * Parsed items and validation errors found in the input file.
      *
-     * @param items valid inventory items
+     * @param items valid spare parts
      * @param errors line-numbered validation errors
      */
-    public record ReadResult(List<InventoryItem> items, List<String> errors) {
+    public record ReadResult(List<SparePart> items, List<String> errors) {
         /**
          * Copies the supplied lists to keep the result immutable.
          *
-         * @param items valid inventory items
+         * @param items valid spare parts
          * @param errors line-numbered validation errors
          */
         public ReadResult {

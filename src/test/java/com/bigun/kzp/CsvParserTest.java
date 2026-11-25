@@ -26,8 +26,12 @@ class CsvParserTest {
         ParseResult result = parser.parse("FLT-01;Фільтр;4;320.50;Постачальник");
 
         assertTrue(result.item().isPresent());
-        assertEquals(new InventoryItem("FLT-01", "Фільтр", 4, 320.50, "Постачальник"),
-                result.item().orElseThrow());
+        SparePart item = result.item().orElseThrow();
+        assertEquals("FLT-01", item.getSku());
+        assertEquals("Фільтр", item.getName());
+        assertEquals(4, item.getStock());
+        assertEquals(320.50, item.getUnitPrice());
+        assertEquals("Постачальник", item.getSupplier());
         assertTrue(result.error().isEmpty());
     }
 
@@ -63,11 +67,11 @@ class CsvParserTest {
 
     @Test
     void handlesUkrainianText() {
-        InventoryItem item = parser.parse("TIM-008;Ремінь ГРМ;7;2100.00;АвтоПостач")
+        SparePart item = parser.parse("TIM-008;Ремінь ГРМ;7;2100.00;АвтоПостач")
                 .item().orElseThrow();
 
-        assertEquals("Ремінь ГРМ", item.name());
-        assertEquals("АвтоПостач", item.supplier());
+        assertEquals("Ремінь ГРМ", item.getName());
+        assertEquals("АвтоПостач", item.getSupplier());
     }
 
     @Test
@@ -80,8 +84,8 @@ class CsvParserTest {
         String report = new ReportFormatter().format(stats, result.errors());
 
         assertEquals(0, stats.validRecordCount());
-        assertEquals(0, stats.totalStock());
-        assertEquals(0.0, stats.totalValue());
+        assertEquals(0, stats.stockValue().totalStock());
+        assertEquals(0.0, stats.stockValue().totalValue());
         assertTrue(stats.mostExpensive().isEmpty());
         assertEquals(2, result.errors().size());
         assertTrue(result.errors().get(0).startsWith("Рядок 1:"));
@@ -107,14 +111,14 @@ class CsvParserTest {
 
     @Test
     void calculatesAllIndicatorsForSeveralRecords() {
-        InventoryItem brake = new InventoryItem("BRK-001", "Гальмівні колодки", 12, 1250.50, "АвтоПостач");
-        InventoryItem belt = new InventoryItem("TIM-008", "Ремінь ГРМ", 7, 2100.00, "АвтоПостач");
+        SparePart brake = new SparePart("BRK-001", "Гальмівні колодки", 12, 1250.50, "АвтоПостач");
+        SparePart belt = new SparePart("TIM-008", "Ремінь ГРМ", 7, 2100.00, "АвтоПостач");
 
         InventoryStats stats = InventoryStats.calculate(List.of(brake, belt));
 
         assertEquals(2, stats.validRecordCount());
-        assertEquals(19, stats.totalStock());
-        assertEquals(29706.00, stats.totalValue(), 0.0001);
+        assertEquals(19, stats.stockValue().totalStock());
+        assertEquals(29706.00, stats.stockValue().totalValue(), 0.0001);
         assertEquals(belt, stats.mostExpensive().orElseThrow());
     }
 
@@ -141,6 +145,22 @@ class CsvParserTest {
         }
 
         assertEquals("Помилка: Невідомий аргумент: --bad", captured.toString(StandardCharsets.UTF_8).trim());
+    }
+
+    @Test
+    void invalidRecordsDoNotChangeStatistics() throws IOException {
+        Path input = tempDir.resolve("mixed.csv");
+        Files.writeString(input, "BRK-001;Гальмівні колодки;12;1250.50;АвтоПостач\n"
+                + "BAD-01;Фільтр;1000;-1;Постачальник\n"
+                + "\n"
+                + "BAD-02;Фільтр;1000;ціна;Постачальник", StandardCharsets.UTF_8);
+        InventoryFileReader.ReadResult result = new InventoryFileReader().read(input);
+        InventoryStats stats = InventoryStats.calculate(result.items());
+
+        assertEquals(1, stats.validRecordCount());
+        assertEquals(new StockValue(12, 15006.00), stats.stockValue());
+        assertEquals("BRK-001", stats.mostExpensive().orElseThrow().getSku());
+        assertEquals(3, result.errors().size());
     }
 
     @Test

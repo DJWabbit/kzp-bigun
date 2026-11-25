@@ -8,14 +8,14 @@ import java.util.Optional;
  * @param item parsed item, or empty when the line is invalid
  * @param error validation message, or empty when the line is valid
  */
-public record ParseResult(Optional<InventoryItem> item, Optional<String> error) {
+public record ParseResult(Optional<SparePart> item, Optional<String> error) {
     /**
-     * Creates a result for a valid inventory item.
+     * Creates a result for a valid spare part.
      *
      * @param item validated item
      * @return successful result
      */
-    public static ParseResult valid(InventoryItem item) {
+    public static ParseResult valid(SparePart item) {
         return new ParseResult(Optional.of(item), Optional.empty());
     }
 
