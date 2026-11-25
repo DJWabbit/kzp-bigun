@@ -16,6 +16,7 @@ public final class Main {
               --version          показати версію у форматі version+build
               --input <шлях>     CSV-файл (за замовчуванням data/input.csv)
               --output <шлях>    файл звіту (за замовчуванням out/report.txt)
+              --warranty         вивести в консоль гарантійну вартість деталей
             """;
 
     private Main() {
@@ -74,5 +75,9 @@ public final class Main {
             Files.createDirectories(parent);
         }
         Files.writeString(output, report, StandardCharsets.UTF_8);
+        if (options.warranty()) {
+            System.out.write(WarrantyReport.format(result.items()).getBytes(StandardCharsets.UTF_8));
+            System.out.flush();
+        }
     }
 }
