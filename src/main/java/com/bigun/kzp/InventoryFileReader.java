@@ -37,7 +37,7 @@ public final class InventoryFileReader {
      * @throws IOException if the file cannot be read
      */
     public ReadResult read(Path path) throws IOException {
-        List<SparePart> items = new ArrayList<>();
+        Repository<SparePart> items = new Repository<>();
         List<String> errors = new ArrayList<>();
         List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
         for (int index = 0; index < lines.size(); index++) {
@@ -46,7 +46,7 @@ public final class InventoryFileReader {
             result.item().ifPresent(items::add);
             result.error().ifPresent(error -> errors.add("Рядок " + lineNumber + ": " + error));
         }
-        return new ReadResult(items, errors);
+        return new ReadResult(items.all(), errors);
     }
 
     /**
