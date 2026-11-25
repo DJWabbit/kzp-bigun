@@ -4,11 +4,12 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * An immutable automobile spare part stored in the warehouse.
+ * Common immutable state and rules of the automobile spare parts stored in the warehouse.
  */
-public final class SparePart {
+public abstract class SparePart {
     private static final int FIELD_COUNT = 5;
 
+    private final PartKind kind;
     private final String sku;
     private final String name;
     private final int stock;
@@ -16,24 +17,37 @@ public final class SparePart {
     private final String supplier;
 
     /**
-     * Creates a spare part and validates all of its fields.
+     * Creates the common part state and validates all of its fields.
      *
+     * @param kind part kind
      * @param sku stock keeping unit
      * @param name part name
      * @param stock non-negative quantity in stock
      * @param unitPrice non-negative finite price per unit
      * @param supplier supplier name
-     * @throws NullPointerException if a text field is null
+     * @throws NullPointerException if the kind or a text field is null
      * @throws IllegalArgumentException if a field violates its invariant
      */
-    public SparePart(String sku, String name, int stock, double unitPrice, String supplier) {
-        requireFilled(sku, name, supplier);
-        if (!Double.isFinite(unitPrice)) {
-            throw new IllegalArgumentException("ціна має бути скінченним числом");
-        }
-        if (unitPrice < 0 || stock < 0) {
-            throw new IllegalArgumentException("ціна та кількість не можуть бути від'ємними");
-        }
+    protected SparePart(PartKind kind, String sku, String name, int stock, double unitPrice, String supplier) {
+        // Перевірка завершується до створення об'єкта, тому частково створеного стану не буває.
+        this(requireValid(kind, sku, name, stock, unitPrice, supplier),
+                kind, sku, name, stock, unitPrice, supplier);
+    }
+
+    /**
+     * Assigns values that are already validated.
+     *
+     * @param validated result of the validation
+     * @param kind part kind
+     * @param sku stock keeping unit
+     * @param name part name
+     * @param stock quantity in stock
+     * @param unitPrice price per unit
+     * @param supplier supplier name
+     */
+    private SparePart(boolean validated, PartKind kind, String sku, String name, int stock,
+                      double unitPrice, String supplier) {
+        this.kind = kind;
         this.sku = sku;
         this.name = name;
         this.stock = stock;
@@ -42,7 +56,7 @@ public final class SparePart {
     }
 
     /**
-     * Parses a semicolon-delimited CSV row into a validated spare part.
+     * Parses a semicolon-delimited CSV row into a validated part of the kind defined by its SKU.
      *
      * @param line CSV row in {@code sku;name;stock;unitPrice;supplier} format
      * @return the parsed spare part
@@ -73,7 +87,7 @@ public final class SparePart {
         } catch (NumberFormatException exception) {
             throw new IllegalArgumentException("ціна та кількість мають бути числами", exception);
         }
-        return new SparePart(sku, name, stock, unitPrice, supplier);
+        return PartKind.fromSku(sku).create(sku, name, stock, unitPrice, supplier);
     }
 
     /**
@@ -81,7 +95,7 @@ public final class SparePart {
      *
      * @return part SKU
      */
-    public String getSku() {
+    public final String getSku() {
         return sku;
     }
 
@@ -90,7 +104,7 @@ public final class SparePart {
      *
      * @return part name
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
@@ -99,7 +113,7 @@ public final class SparePart {
      *
      * @return stock quantity
      */
-    public int getStock() {
+    public final int getStock() {
         return stock;
     }
 
@@ -108,7 +122,7 @@ public final class SparePart {
      *
      * @return unit price
      */
-    public double getUnitPrice() {
+    public final double getUnitPrice() {
         return unitPrice;
     }
 
@@ -117,8 +131,51 @@ public final class SparePart {
      *
      * @return supplier name
      */
-    public String getSupplier() {
+    public final String getSupplier() {
         return supplier;
+    }
+
+    /**
+     * Returns the part kind.
+     *
+     * @return part kind
+     */
+    public final PartKind getKind() {
+        return kind;
+    }
+
+    /**
+     * Calculates the warranty cost of the whole stock of this part.
+     *
+     * @return warranty cost
+     */
+    public abstract double warrantyCost();
+
+    /**
+     * Compares parts by subtype and SKU.
+     *
+     * @param other object to compare with
+     * @return whether both objects have the same subtype and SKU
+     */
+    @Override
+    public final boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        return sku.equals(((SparePart) other).sku);
+    }
+
+    /**
+     * Returns a hash code consistent with {@link #equals(Object)}.
+     *
+     * @return hash code
+     */
+    @Override
+    public final int hashCode() {
+        return Objects.hash(getClass(), sku);
     }
 
     /**
@@ -131,6 +188,30 @@ public final class SparePart {
         return String.format(Locale.ROOT,
                 "SparePart{sku=\"%s\", name=\"%s\", stock=%d, unitPrice=%.2f, supplier=\"%s\"}",
                 sku, name, stock, unitPrice, supplier);
+    }
+
+    /**
+     * Checks the common invariants of all kinds of parts.
+     *
+     * @param kind part kind
+     * @param sku stock keeping unit
+     * @param name part name
+     * @param stock quantity in stock
+     * @param unitPrice price per unit
+     * @param supplier supplier name
+     * @return true when all values are valid
+     */
+    private static boolean requireValid(PartKind kind, String sku, String name, int stock,
+                                        double unitPrice, String supplier) {
+        Objects.requireNonNull(kind, "kind");
+        requireFilled(sku, name, supplier);
+        if (!Double.isFinite(unitPrice)) {
+            throw new IllegalArgumentException("ціна має бути скінченним числом");
+        }
+        if (unitPrice < 0 || stock < 0) {
+            throw new IllegalArgumentException("ціна та кількість не можуть бути від'ємними");
+        }
+        return true;
     }
 
     /**

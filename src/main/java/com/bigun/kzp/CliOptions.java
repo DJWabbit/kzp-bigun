@@ -9,8 +9,9 @@ import java.nio.file.Path;
  * @param output report output path
  * @param help whether help was requested
  * @param version whether version was requested
+ * @param warranty whether the warranty report was requested
  */
-public record CliOptions(Path input, Path output, boolean help, boolean version) {
+public record CliOptions(Path input, Path output, boolean help, boolean version, boolean warranty) {
     /**
      * Parses command line options and their path values.
      *
@@ -23,10 +24,12 @@ public record CliOptions(Path input, Path output, boolean help, boolean version)
         Path output = Path.of("out", "report.txt");
         boolean help = false;
         boolean version = false;
+        boolean warranty = false;
         for (int index = 0; index < args.length; index++) {
             switch (args[index]) {
                 case "--help" -> help = true;
                 case "--version" -> version = true;
+                case "--warranty" -> warranty = true;
                 case "--input" -> {
                     if (++index >= args.length) {
                         throw new IllegalArgumentException("Для --input потрібно вказати шлях.");
@@ -42,6 +45,6 @@ public record CliOptions(Path input, Path output, boolean help, boolean version)
                 default -> throw new IllegalArgumentException("Невідомий аргумент: " + args[index]);
             }
         }
-        return new CliOptions(input, output, help, version);
+        return new CliOptions(input, output, help, version, warranty);
     }
 }
