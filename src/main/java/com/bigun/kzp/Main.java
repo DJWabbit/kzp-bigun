@@ -19,6 +19,8 @@ public final class Main {
               --warranty         вивести в консоль гарантійну вартість деталей
               --queries          вивести в консоль результати запитів до складу
               --find <артикул>   знайти деталь за артикулом і вивести її в консоль
+              --export <шлях>    записати деталі у CSV і перевірити відновлення
+              --import <шлях>    прочитати деталі з CSV і вивести артикули
             """;
 
     private Main() {
@@ -32,6 +34,9 @@ public final class Main {
     public static void main(String[] args) {
         try {
             run(args);
+        } catch (DataStorageException exception) {
+            printError(describe(exception));
+            System.exit(1);
         } catch (IllegalArgumentException | IOException exception) {
             printError(exception.getMessage());
             System.exit(1);
@@ -54,8 +59,9 @@ public final class Main {
      *
      * @param args command-line arguments
      * @throws IOException if the input, output, or version resource cannot be accessed
+     * @throws DataStorageException if the CSV export or import fails
      */
-    private static void run(String[] args) throws IOException {
+    private static void run(String[] args) throws IOException, DataStorageException {
         CliOptions options = CliOptions.parse(args);
         if (options.help()) {
             System.out.write(HELP.getBytes(StandardCharsets.UTF_8));
@@ -77,15 +83,42 @@ public final class Main {
             Files.createDirectories(parent);
         }
         Files.writeString(output, report, StandardCharsets.UTF_8);
-        StringBuilder details = new StringBuilder();
         if (options.warranty()) {
-            details.append(WarrantyReport.format(result.items()));
+            print(WarrantyReport.format(result.items()));
         }
         if (options.queries()) {
-            details.append(QueryReport.format(result.items()));
+            print(QueryReport.format(result.items()));
         }
-        options.find().ifPresent(sku -> details.append(QueryReport.formatSearch(result.items(), sku)));
-        System.out.write(details.toString().getBytes(StandardCharsets.UTF_8));
+        if (options.find().isPresent()) {
+            print(QueryReport.formatSearch(result.items(), options.find().get()));
+        }
+        if (options.exportPath().isPresent()) {
+            print(StorageReport.exportParts(options.exportPath().get(), result.items()));
+        }
+        if (options.importPath().isPresent()) {
+            print(StorageReport.importParts(options.importPath().get()));
+        }
+    }
+
+    /**
+     * Prints text as UTF-8 so that Cyrillic does not depend on the system charset.
+     *
+     * @param text text to print
+     */
+    private static void print(String text) {
+        System.out.writeBytes(text.getBytes(StandardCharsets.UTF_8));
         System.out.flush();
+    }
+
+    /**
+     * Describes a storage failure and the kind of the original file error.
+     *
+     * @param exception storage failure
+     * @return error description
+     */
+    static String describe(DataStorageException exception) {
+        return exception.getCause() instanceof IOException cause
+                ? exception.getMessage() + " (" + cause.getClass().getSimpleName() + ")"
+                : exception.getMessage();
     }
 }

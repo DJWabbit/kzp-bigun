@@ -201,7 +201,7 @@ public abstract class SparePart {
      * @param supplier supplier name
      * @return true when all values are valid
      */
-    private static boolean requireValid(PartKind kind, String sku, String name, int stock,
+    static boolean requireValid(PartKind kind, String sku, String name, int stock,
                                         double unitPrice, String supplier) {
         Objects.requireNonNull(kind, "kind");
         requireFilled(sku, name, supplier);

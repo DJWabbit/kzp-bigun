@@ -7,9 +7,9 @@
 * **Викладач:** Максим Олексів
 
 
-# Лабораторна робота №4 — склад автозапчастин
+# Лабораторна робота №5 — склад автозапчастин
 
-Лабораторна робота №4 замінює цикли обчислень на Stream API та додає шість запитів до складу. Формат входу, звичайний звіт і `--warranty` не змінилися.
+Лабораторна робота №5 додає параметризоване сховище `Repository<T>`, анотацію `@CsvColumn`, рефлексивний CSV-експортер і відновлення записів. Формат входу, звичайний звіт і попередні ключі не змінилися.
 
 Консольний застосунок для аналізу залишків автозапчастин (курс «Кросплатформні засоби програмування», рівень 2, варіант №4). Застосунок перевіряє записи CSV, обчислює кількість записів, сумарний складський залишок, вартість запасів і найдорожчу деталь. Некоректні рядки не переривають обробку: номер рядка та причина додаються до звіту.
 
@@ -55,6 +55,17 @@ sku;name;stock;unitPrice;supplier
 
 `--queries` виводить перші п'ять запитів, `--find <артикул>` — пошук. Регістр артикула враховується. Вивід іде лише в консоль, файл звіту не змінюється. Приклад даних: [data/queries.csv](data/queries.csv).
 
+## Експорт та імпорт CSV
+
+Експорт створює окремий CSV: UTF-8, кома, перший рядок — заголовок, порядок стовпців — за іменами полів.
+
+```text
+артикул,виробник,назва,ціна,кількість
+FLT-014-R,Мотор-Сервіс,"Фільтр, масляний",320.0,25
+```
+
+Поле з комою, лапкою або перенесенням рядка береться в лапки, внутрішня лапка подвоюється. `--export <шлях>` записує деталі, читає їх назад і порівнює, `--import <шлях>` виводить артикули з файла. Помилки формату містять номер запису разом із заголовком. Приклади: [data/stock.csv](data/stock.csv), [data/stock-invalid.csv](data/stock-invalid.csv), [data/stock-empty.csv](data/stock-empty.csv).
+
 ## Збірка та запуск
 
 Потрібен JDK 21. Maven Wrapper автоматично завантажує Maven під час першого запуску.
@@ -67,6 +78,8 @@ java -jar target/kzp-bigun-1.0.0.jar --input data/input.csv --output out/report.
 java -jar target/kzp-bigun-1.0.0.jar --warranty
 java -jar target/kzp-bigun-1.0.0.jar --input data/queries.csv --queries
 java -jar target/kzp-bigun-1.0.0.jar --find TIM-008
+java -jar target/kzp-bigun-1.0.0.jar --export target/stock.csv
+java -jar target/kzp-bigun-1.0.0.jar --import data/stock.csv
 java -jar target/kzp-bigun-1.0.0.jar --version
 java -jar target/kzp-bigun-1.0.0.jar --help
 ```
@@ -82,6 +95,11 @@ java -jar target/kzp-bigun-1.0.0.jar --help
 - `WarrantyReport` — звіт про гарантійну вартість для `--warranty`.
 - `PartStreamQueries` — запити Stream API до складу.
 - `QueryReport` — форматування запитів для `--queries` і `--find`.
+- `Repository<T>` — параметризоване сховище.
+- `CsvColumn`, `CsvExporter` — анотація стовпця та рефлексивний експортер.
+- `CsvDocumentParser`, `CsvStorage` — розбір CSV, читання й запис файлів.
+- `SparePartRecord`, `StorageReport` — запис для CSV та вивід `--export` і `--import`.
+- `DataStorageException` — помилка зберігання із причиною.
 - `StockValue` — record із загальною кількістю та вартістю запасу.
 - `CsvParser` — перетворення помилки рядка на `ParseResult`.
 - `InventoryFileReader` — читання UTF-8 файлу та накопичення помилок із номерами рядків.
