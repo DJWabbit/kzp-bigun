@@ -13,9 +13,12 @@ import java.util.Optional;
  * @param warranty whether the warranty report was requested
  * @param queries whether the query report was requested
  * @param find SKU to search for, if requested
+ * @param exportPath CSV file to export parts to, if requested
+ * @param importPath CSV file to import parts from, if requested
  */
 public record CliOptions(Path input, Path output, boolean help, boolean version, boolean warranty,
-                         boolean queries, Optional<String> find) {
+                         boolean queries, Optional<String> find, Optional<Path> exportPath,
+                         Optional<Path> importPath) {
     /**
      * Parses command line options and their path values.
      *
@@ -31,6 +34,8 @@ public record CliOptions(Path input, Path output, boolean help, boolean version,
         boolean warranty = false;
         boolean queries = false;
         Optional<String> find = Optional.empty();
+        Optional<Path> exportPath = Optional.empty();
+        Optional<Path> importPath = Optional.empty();
         for (int index = 0; index < args.length; index++) {
             switch (args[index]) {
                 case "--help" -> help = true;
@@ -55,9 +60,21 @@ public record CliOptions(Path input, Path output, boolean help, boolean version,
                     }
                     output = Path.of(args[index]);
                 }
+                case "--export" -> {
+                    if (++index >= args.length) {
+                        throw new IllegalArgumentException("Для --export потрібно вказати шлях.");
+                    }
+                    exportPath = Optional.of(Path.of(args[index]));
+                }
+                case "--import" -> {
+                    if (++index >= args.length) {
+                        throw new IllegalArgumentException("Для --import потрібно вказати шлях.");
+                    }
+                    importPath = Optional.of(Path.of(args[index]));
+                }
                 default -> throw new IllegalArgumentException("Невідомий аргумент: " + args[index]);
             }
         }
-        return new CliOptions(input, output, help, version, warranty, queries, find);
+        return new CliOptions(input, output, help, version, warranty, queries, find, exportPath, importPath);
     }
 }
