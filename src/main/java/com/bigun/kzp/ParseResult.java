@@ -2,8 +2,8 @@ package com.bigun.kzp;
 
 import java.util.Optional;
 
-public record ParseResult(Optional<InventoryItem> item, Optional<String> error) {
-    public static ParseResult valid(InventoryItem item) {
+public record ParseResult(Optional<SparePart> item, Optional<String> error) {
+    public static ParseResult valid(SparePart item) {
         return new ParseResult(Optional.of(item), Optional.empty());
     }
 

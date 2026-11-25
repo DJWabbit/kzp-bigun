@@ -25,8 +25,12 @@ class CsvParserTest {
         ParseResult result = parser.parse("Фільтр;FLT-01;320.50;4;Постачальник");
 
         assertTrue(result.item().isPresent());
-        assertEquals(new InventoryItem("Фільтр", "FLT-01", 320.50, 4, "Постачальник"),
-                result.item().orElseThrow());
+        SparePart item = result.item().orElseThrow();
+        assertEquals("Фільтр", item.getName());
+        assertEquals("FLT-01", item.getSku());
+        assertEquals(320.50, item.getUnitPrice());
+        assertEquals(4, item.getStock());
+        assertEquals("Постачальник", item.getSupplier());
         assertTrue(result.error().isEmpty());
     }
 
@@ -62,11 +66,11 @@ class CsvParserTest {
 
     @Test
     void handlesUkrainianText() {
-        InventoryItem item = parser.parse("Ремінь ГРМ;TIM-008;2100.00;7;АвтоПостач")
+        SparePart item = parser.parse("Ремінь ГРМ;TIM-008;2100.00;7;АвтоПостач")
                 .item().orElseThrow();
 
-        assertEquals("Ремінь ГРМ", item.name());
-        assertEquals("АвтоПостач", item.supplier());
+        assertEquals("Ремінь ГРМ", item.getName());
+        assertEquals("АвтоПостач", item.getSupplier());
     }
 
     @Test
@@ -79,8 +83,8 @@ class CsvParserTest {
         String report = new ReportFormatter().format(stats, result.errors());
 
         assertEquals(0, stats.validRecordCount());
-        assertEquals(0, stats.totalStock());
-        assertEquals(0.0, stats.totalValue());
+        assertEquals(0, stats.stockValue().totalStock());
+        assertEquals(0.0, stats.stockValue().totalValue());
         assertTrue(stats.mostExpensive().isEmpty());
         assertEquals(2, result.errors().size());
         assertTrue(result.errors().get(0).startsWith("Рядок 1:"));

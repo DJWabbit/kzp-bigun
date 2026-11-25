@@ -21,7 +21,7 @@ public final class InventoryFileReader {
 
     
     public ReadResult read(Path path) throws IOException {
-        List<InventoryItem> items = new ArrayList<>();
+        List<SparePart> items = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
         for (int index = 0; index < lines.size(); index++) {
@@ -34,7 +34,7 @@ public final class InventoryFileReader {
     }
 
     
-    public record ReadResult(List<InventoryItem> items, List<String> errors) {
+    public record ReadResult(List<SparePart> items, List<String> errors) {
        
         public ReadResult {
             items = List.copyOf(items);
