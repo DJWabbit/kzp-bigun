@@ -4,80 +4,76 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * An immutable automobile spare part.
+ * An immutable automobile spare part stored in the warehouse.
  */
 public final class SparePart {
-    private final String name;
+    private static final int FIELD_COUNT = 5;
+
     private final String sku;
-    private final double unitPrice;
+    private final String name;
     private final int stock;
+    private final double unitPrice;
     private final String supplier;
 
     /**
      * Creates a spare part and validates all of its fields.
      *
+     * @param sku stock keeping unit
      * @param name part name
-     * @param sku part stock keeping unit
-     * @param unitPrice non-negative finite price per unit
      * @param stock non-negative quantity in stock
+     * @param unitPrice non-negative finite price per unit
      * @param supplier supplier name
      * @throws NullPointerException if a text field is null
      * @throws IllegalArgumentException if a field violates its invariant
      */
-    public SparePart(String name, String sku, double unitPrice, int stock, String supplier) {
-        this.name = Objects.requireNonNull(name, "name");
-        this.sku = Objects.requireNonNull(sku, "sku");
-        this.supplier = Objects.requireNonNull(supplier, "supplier");
-        if (this.name.isBlank() || this.sku.isBlank() || this.supplier.isBlank()) {
-            throw new IllegalArgumentException("назва, артикул і постачальник не можуть бути порожніми");
-        }
+    public SparePart(String sku, String name, int stock, double unitPrice, String supplier) {
+        requireFilled(sku, name, supplier);
         if (!Double.isFinite(unitPrice)) {
             throw new IllegalArgumentException("ціна має бути скінченним числом");
         }
         if (unitPrice < 0 || stock < 0) {
             throw new IllegalArgumentException("ціна та кількість не можуть бути від'ємними");
         }
-        this.unitPrice = unitPrice;
+        this.sku = sku;
+        this.name = name;
         this.stock = stock;
+        this.unitPrice = unitPrice;
+        this.supplier = supplier;
     }
 
     /**
      * Parses a semicolon-delimited CSV row into a validated spare part.
      *
-     * @param line CSV row in {@code name;sku;unitPrice;stock;supplier} format
+     * @param line CSV row in {@code sku;name;stock;unitPrice;supplier} format
      * @return the parsed spare part
      * @throws NullPointerException if the row is null
-     * @throws IllegalArgumentException if the row is malformed or contains invalid values
+     * @throws IllegalArgumentException if the row is blank, malformed, or contains invalid values
      */
     public static SparePart fromCsv(String line) {
         Objects.requireNonNull(line, "line");
+        if (line.isBlank()) {
+            throw new IllegalArgumentException("порожній рядок");
+        }
         String[] fields = line.split(";", -1);
-        if (fields.length != 5) {
-            throw new IllegalArgumentException("очікується 5 полів, отримано " + fields.length);
+        if (fields.length != FIELD_COUNT) {
+            throw new IllegalArgumentException(
+                    "очікується %d полів, отримано %d".formatted(FIELD_COUNT, fields.length));
         }
-        if (fields[0].trim().isEmpty() || fields[1].trim().isEmpty() || fields[4].trim().isEmpty()) {
-            throw new IllegalArgumentException("назва, артикул і постачальник не можуть бути порожніми");
-        }
+        String sku = fields[0].trim();
+        String name = fields[1].trim();
+        String supplier = fields[4].trim();
+        // Текст перевіряється до чисел, щоб причина помилки збігалася з попередньою роботою.
+        requireFilled(sku, name, supplier);
 
-        final double unitPrice;
         final int stock;
+        final double unitPrice;
         try {
-            unitPrice = Double.parseDouble(fields[2].trim());
-            stock = Integer.parseInt(fields[3].trim());
+            stock = Integer.parseInt(fields[2].trim());
+            unitPrice = Double.parseDouble(fields[3].trim());
         } catch (NumberFormatException exception) {
             throw new IllegalArgumentException("ціна та кількість мають бути числами", exception);
         }
-
-        return new SparePart(fields[0].trim(), fields[1].trim(), unitPrice, stock, fields[4].trim());
-    }
-
-    /**
-     * Returns the part name.
-     *
-     * @return part name
-     */
-    public String getName() {
-        return name;
+        return new SparePart(sku, name, stock, unitPrice, supplier);
     }
 
     /**
@@ -90,12 +86,12 @@ public final class SparePart {
     }
 
     /**
-     * Returns the price per unit.
+     * Returns the part name.
      *
-     * @return unit price
+     * @return part name
      */
-    public double getUnitPrice() {
-        return unitPrice;
+    public String getName() {
+        return name;
     }
 
     /**
@@ -105,6 +101,15 @@ public final class SparePart {
      */
     public int getStock() {
         return stock;
+    }
+
+    /**
+     * Returns the price per unit.
+     *
+     * @return unit price
+     */
+    public double getUnitPrice() {
+        return unitPrice;
     }
 
     /**
@@ -124,7 +129,25 @@ public final class SparePart {
     @Override
     public String toString() {
         return String.format(Locale.ROOT,
-                "SparePart{name=\"%s\", sku=\"%s\", unitPrice=%.2f, stock=%d, supplier=\"%s\"}",
-                name, sku, unitPrice, stock, supplier);
+                "SparePart{sku=\"%s\", name=\"%s\", stock=%d, unitPrice=%.2f, supplier=\"%s\"}",
+                sku, name, stock, unitPrice, supplier);
+    }
+
+    /**
+     * Checks the mandatory text fields; the only place where this rule is defined.
+     *
+     * @param sku stock keeping unit
+     * @param name part name
+     * @param supplier supplier name
+     * @throws NullPointerException if a value is null
+     * @throws IllegalArgumentException if a value is blank
+     */
+    private static void requireFilled(String sku, String name, String supplier) {
+        Objects.requireNonNull(sku, "sku");
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(supplier, "supplier");
+        if (sku.isBlank() || name.isBlank() || supplier.isBlank()) {
+            throw new IllegalArgumentException("назва, артикул і постачальник не можуть бути порожніми");
+        }
     }
 }
